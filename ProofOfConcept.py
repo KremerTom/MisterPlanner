@@ -13,12 +13,10 @@ class Plan(db.Model):
     pointOfNoReturn = db.DateTimeProperty(required=True)
     eventDate = db.DateTimeProperty(required=True)
 
-# Tom: question: Is this only to relate plans with their creators? or is this
-# with anyone involved? Like, should their be a third boolean property 
-# called Attending(True/False, but not required)?
 class UsersToPlans(db.Model):
     userId = db.StringProperty(required=True)
     planId = db.StringProperty(required=True)
+    attending = db.BooleanProperty(required=False)
 
 def createUser(emailAddress):
     user = User(email = emailAddress)
@@ -33,21 +31,33 @@ def createUser(emailAddress):
         print emailAddress + " already exists"
         return False
 
+class CreateUserWithParams(webapp2.RequestHandler):
+    def post(self):
+        email=self.request.get("email")
+        self.response.out.write('<li>' + email + '</li>')
+
+        if createUser(email):
+            self.response.write("success")
+        else:
+            self.response.write("user already exists")
+
 # create a new user with email set to "email" URL param
 class CreateUser(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-        
-        if createUser(self.request.get("email")):
-            self.response.write("success")
-        else:
-            self.response.write("user already exists")
-            
+
+        self.response.write(
+            """<form method="post" action="/createuserwithparams">
+                Enter Email Address:<br>
+                <div><input type="text" name="email"></div>
+                <div><input type="submit" value="Create Account"></div>
+              </form>""")
+
 # list all users
 class ListUsers(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-                
+
         #write all users in system
         q = User.all()
         for p in q.run():
@@ -66,7 +76,7 @@ def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
 
     # Tom: I would add
     q.filter("authorId =", newAuthorId)
-    
+
     if q.get() is None:
         plan.put()
         print "successfully wrote " + newTitle
@@ -82,15 +92,18 @@ class CreatePlan(webapp2.RequestHandler):
         # retrieve URL parameter values
         emailAddress = self.request.get("email")
         title = self.request.get("title")
-        eventDate = datetime.datetime.now()
-        pointOfNoReturn = datetime.datetime.now()
-        
+
+        now = datetime.datetime.now()
+        now_plus_10 = now + datetime.timedelta(minutes = 10)
+        eventDate = now
+        pointOfNoReturn = now_plus_10
+
         # get a string representation of the key for the user creating this plan
         q = User.all()
         q.filter("email = ", emailAddress)
         p = q.get()
         userKey = str(p.key())
-        
+
         # try to create the plan
         if createPlan(userKey, title, pointOfNoReturn, eventDate):
             self.response.write("success")
@@ -102,7 +115,7 @@ class CreatePlan(webapp2.RequestHandler):
 
 # doesn't do jack shit right now
 class MainPage(webapp2.RequestHandler):
-    def get(self):        
+    def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
         self.response.headers['EasterEgg'] = 'HOLLYWOOOOOOOOOOD'
         # Tom: Not 'RickyTickyTavvy'?
@@ -110,6 +123,7 @@ class MainPage(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/createuser', CreateUser),
+    ("/createuserwithparams", CreateUserWithParams),
     ('/listusers', ListUsers),
     ('/createplan', CreatePlan),
 ], debug=True)
