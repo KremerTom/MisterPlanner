@@ -104,6 +104,14 @@ class PlanFormHandler(webapp2.RequestHandler):
         eventDate = convertInputToDatetime(self.request.get("eventtime"))
         pointOfNoReturn = convertInputToDatetime(self.request.get("responsetime"))
 
+        if pointOfNoReturn > eventDate:
+            self.response.write("<div>You can't have the response time after the event start time</div>")
+            return
+
+        if eventDate < datetime.datetime.now() or pointOfNoReturn < datetime.datetime.now():
+            self.response.write("You can't use dates or times from the past!")
+            return
+
         # Check if the entered email is actually a member
         q = User.all()
         q.filter("email = ", emailAddress)
