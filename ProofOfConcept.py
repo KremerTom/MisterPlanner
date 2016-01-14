@@ -69,12 +69,6 @@ def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
     q = Plan.all()
     q.filter("title =", newTitle)
     q.filter("eventDate =", newEventDate)
-
-    # Tom: This doesn't actually identify if the plan already exists.
-    # If two groups are trying to organize going to the same showtime...
-    # But that's not urgent
-
-    # Tom: I would add
     q.filter("authorId =", newAuthorId)
 
     if q.get() is None:
@@ -82,35 +76,68 @@ def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
         print "successfully wrote " + newTitle
         return True
     else:
-        print eventTitle + " already exists"
+        print newTitle + " already exists"
         return False
 
 # create a new plan according to URL parameters
 class CreatePlan(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-        # retrieve URL parameter values
-        emailAddress = self.request.get("email")
+
+        self.response.write(
+            """<form method="post" action="/planformhandler">
+                <div>Your Email Address: <input type="text" name="email"></div>
+                <div>Name of Event: <input type="text" name="title"></div>
+                <div>When is your event? <input type="datetime-local" name="eventtime">
+                    </div>
+                <div>By when do you need your responses? <input type="datetime-local" name="responsetime">
+                    </div>
+                <div><input type="submit" value="Create Plan"></div>
+              </form>""")
+
+
+# Handles the submitted form data for creating a new plan.
+class PlanFormHandler(webapp2.RequestHandler):
+    def post(self):
+        emailAddress=self.request.get("email")
         title = self.request.get("title")
+        eventDate = convertInputToDatetime(self.request.get("eventtime"))
+        pointOfNoReturn = convertInputToDatetime(self.request.get("responsetime"))
 
-        now = datetime.datetime.now()
-        now_plus_10 = now + datetime.timedelta(minutes = 10)
-        eventDate = now
-        pointOfNoReturn = now_plus_10
-
-        # get a string representation of the key for the user creating this plan
+        # Check if the entered email is actually a member
         q = User.all()
         q.filter("email = ", emailAddress)
         p = q.get()
+        if p is None:
+            self.response.write("<div>That's not a valid email</div>")
+            return
+
+        # CHANGED TO AUTHOR'S EMAIL
+        # Use that email's key
         userKey = str(p.key())
 
         # try to create the plan
-        if createPlan(userKey, title, pointOfNoReturn, eventDate):
+        if createPlan(emailAddress, title, pointOfNoReturn, eventDate):
             self.response.write("success")
         else:
-            self.response.write("plan already exists")
+            self.response.write(title + " already exists")
+
+# Converts the string representation that the form input accepts into an actual datetime
+def convertInputToDatetime(str):
+    f = "%Y-%m-%dT%H:%M"
+    return datetime.datetime.strptime(str, f)
+
+class ListPlans(webapp2.RequestHandler):
+    def get(self):
+        # self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
 
+        f = "%m/%d/%Y %H:%M"
+
+        #write all plans in system
+        q = Plan.all()
+        for p in q.run():
+            self.response.write("<li>Email: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
 
 
 # doesn't do jack shit right now
@@ -123,7 +150,9 @@ class MainPage(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/createuser', CreateUser),
-    ("/createuserwithparams", CreateUserWithParams),
+    ('/createuserwithparams', CreateUserWithParams),
     ('/listusers', ListUsers),
     ('/createplan', CreatePlan),
+    ('/planformhandler', PlanFormHandler),
+    ('/listplans', ListPlans)
 ], debug=True)
