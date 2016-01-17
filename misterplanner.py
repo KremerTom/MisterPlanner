@@ -11,6 +11,7 @@ class MainPage(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
         self.response.headers['EasterEgg'] = 'HOLLYWOOOOOOOOOOD'
         # Tom: Not 'RickyTickyTavvy'?
+        # THANKS PENCILVESTER!
 
 mainPages = [('/', MainPage)]
 allPages = mainPages + users.usersPages + plans.plansPages
