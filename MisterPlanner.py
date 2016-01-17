@@ -2,8 +2,8 @@ from google.appengine.ext import db
 
 import datetime
 import webapp2
-import Plans
-import Users
+import plans
+import users
 
 # doesn't do jack shit right now
 class MainPage(webapp2.RequestHandler):
@@ -13,6 +13,6 @@ class MainPage(webapp2.RequestHandler):
         # Tom: Not 'RickyTickyTavvy'?
 
 mainPages = [('/', MainPage)]
-allPages = mainPages + Users.usersPages + Plans.plansPages
+allPages = mainPages + users.usersPages + plans.plansPages
 
 app = webapp2.WSGIApplication(allPages, debug=True)
