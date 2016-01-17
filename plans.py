@@ -1,7 +1,9 @@
 from google.appengine.ext import db
 
+import users
 import datetime
 import webapp2
+
 
 
 
@@ -65,7 +67,7 @@ class PlanFormHandler(webapp2.RequestHandler):
             return
 
         # Check if the entered email is actually a member
-        q = User.all()
+        q = users.User.all()
         q.filter("email = ", emailAddress)
         p = q.get()
         if p is None:
