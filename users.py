@@ -5,40 +5,40 @@ import webapp2
 
 
 class User(db.Model):
-    email = db.StringProperty(required=True)
+    phoneNumber = db.PhoneNumberProperty(required=True)
 
-def createUser(emailAddress):
-    user = User(email = emailAddress)
+def createUser(phone):
+    user = User(phoneNumber = phone)
     q = User.all()
-    q.filter("email =", emailAddress)
+    q.filter("phoneNumber =", phone)
 
     if q.get() is None:
         user.put()
-        print "successfully wrote " + emailAddress
+        print "successfully wrote " + phone
         return True
     else:
-        print emailAddress + " already exists"
+        print phone + " already exists"
         return False
 
 class CreateUserWithParams(webapp2.RequestHandler):
     def post(self):
-        email=self.request.get("email")
-        self.response.out.write('<li>' + email + '</li>')
+        phone=self.request.get("phone")
+        self.response.out.write('<li>' + phone + '</li>')
 
-        if createUser(email):
+        if createUser(phone):
             self.response.write("success")
         else:
             self.response.write("user already exists")
 
-# create a new user with email set to "email" URL param
+# create a new user with phone set to "phone" URL param
 class CreateUser(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
         self.response.write(
             """<form method="post" action="/createuserwithparams">
-                Enter Email Address:<br>
-                <div><input type="text" name="email"></div>
+                Enter phone number:<br>
+                <div><input type="text" name="phone"></div>
                 <div><input type="submit" value="Create Account"></div>
               </form>""")
 
@@ -50,7 +50,7 @@ class ListUsers(webapp2.RequestHandler):
         #write all users in system
         q = User.all()
         for p in q.run():
-            self.response.write("<li>Email: " + p.email + ", ID: " + str(p.key().id()) + "</li>\n")
+            self.response.write("<li>Phone: " + p.phoneNumber + ", ID: " + str(p.key().id()) + "</li>\n")
 
 
 usersPages = [('/createuser', CreateUser), ('/createuserwithparams', CreateUserWithParams), ('/listusers', ListUsers)]
