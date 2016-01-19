@@ -40,7 +40,7 @@ class CreatePlan(webapp2.RequestHandler):
 
         self.response.write(
             """<form method="post" action="/planformhandler">
-                <div>Your Email Address: <input type="text" name="email"></div>
+                <div>Your phone number: <input type="text" name="phone"></div>
                 <div>Name of Event: <input type="text" name="title"></div>
                 <div>When is your event? <input type="datetime-local" name="eventtime">
                     </div>
@@ -53,7 +53,7 @@ class CreatePlan(webapp2.RequestHandler):
 # Handles the submitted form data for creating a new plan.
 class PlanFormHandler(webapp2.RequestHandler):
     def post(self):
-        emailAddress=self.request.get("email")
+        phone=self.request.get("phone")
         title = self.request.get("title")
         eventDate = convertInputToDatetime(self.request.get("eventtime"))
         pointOfNoReturn = convertInputToDatetime(self.request.get("responsetime"))
@@ -63,23 +63,23 @@ class PlanFormHandler(webapp2.RequestHandler):
             return
 
         if eventDate < datetime.datetime.now() or pointOfNoReturn < datetime.datetime.now():
-            self.response.write("You can't use dates or times from the past!")
+            self.response.write("<div>You can't use dates or times from the past!</div>")
             return
 
-        # Check if the entered email is actually a member
+        # Check if the entered phone number is actually a member
         q = users.User.all()
-        q.filter("email = ", emailAddress)
+        q.filter("phoneNumber = ", phone)
         p = q.get()
         if p is None:
-            self.response.write("<div>That's not a valid email</div>")
+            self.response.write("<div>We don't have any user with that phone number</div>")
             return
 
-        # CHANGED TO AUTHOR'S EMAIL
-        # Use that email's key
+        # CHANGED TO AUTHOR'S PHONE
+        # Use that phone's key
         userKey = str(p.key())
 
         # try to create the plan
-        if createPlan(emailAddress, title, pointOfNoReturn, eventDate):
+        if createPlan(phone, title, pointOfNoReturn, eventDate):
             self.response.write("success")
         else:
             self.response.write(title + " already exists")
@@ -99,7 +99,7 @@ class ListPlans(webapp2.RequestHandler):
         #write all plans in system
         q = Plan.all()
         for p in q.run():
-            self.response.write("<li>Email: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
+            self.response.write("<li>Phone number: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
 
 
 plansPages = [('/createplan', CreatePlan), ('/planformhandler', PlanFormHandler), ('/listplans', ListPlans)]
