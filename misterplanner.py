@@ -1,9 +1,7 @@
-from google.appengine.ext import db
-
-import datetime
 import webapp2
 import plans
 import users
+import usersforms
 
 # doesn't do jack shit right now
 class MainPage(webapp2.RequestHandler):
@@ -14,6 +12,6 @@ class MainPage(webapp2.RequestHandler):
         # THANKS PENCILVESTER!
 
 mainPages = [('/', MainPage)]
-allPages = mainPages + users.usersPages + plans.plansPages
+allPages = mainPages + users.usersAPI + usersforms.usersForms + plans.plansPages
 
 app = webapp2.WSGIApplication(allPages, debug=True)
