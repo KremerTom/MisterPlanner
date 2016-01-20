@@ -5,8 +5,6 @@ import datetime
 import webapp2
 
 
-
-
 class Plan(db.Model):
     authorId = db.StringProperty(required=True)
     title = db.StringProperty(required=True)
