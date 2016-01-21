@@ -2,6 +2,7 @@ import webapp2
 import plans
 import users
 import usersforms
+import plansforms
 
 # doesn't do jack shit right now
 class MainPage(webapp2.RequestHandler):
@@ -12,6 +13,6 @@ class MainPage(webapp2.RequestHandler):
         # THANKS PENCILVESTER!
 
 mainPages = [('/', MainPage)]
-allPages = mainPages + users.usersAPI + usersforms.usersForms + plans.plansPages
+allPages = mainPages + users.usersAPI + usersforms.usersForms + plans.plansAPI + plansforms.plansForms
 
 app = webapp2.WSGIApplication(allPages, debug=True)
