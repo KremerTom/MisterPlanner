@@ -18,13 +18,13 @@ class UsersToPlans(db.Model):
 
 def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
 
-    if newPointOfNoReturn > newEventDate:
-        print "You can't have the response time after the event start time"
-        return
-
-    if newEventDate < datetime.datetime.now() or newPointOfNoReturn < datetime.datetime.now():
-        print "You can't use dates or times from the past!"
-        return
+    # if newPointOfNoReturn > newEventDate:
+    #     print "You can't have the response time after the event start time"
+    #     return
+    #
+    # if newEventDate < datetime.datetime.now() or newPointOfNoReturn < datetime.datetime.now():
+    #     print "You can't use dates or times from the past!"
+    #     return
 
     plan = Plan(authorId = newAuthorId, title = newTitle, pointOfNoReturn = newPointOfNoReturn, eventDate = newEventDate)
     q = Plan.all()
@@ -85,7 +85,7 @@ class ListPlans(webapp2.RequestHandler):
         #write all plans in system
         q = Plan.all()
         for p in q.run():
-            self.response.write("<li>Phone number: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
+            self.response.write("<li>userID: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
 
 
 plansAPI = [('/listplans', ListPlans), ('/createplan', CreatePlan)]
