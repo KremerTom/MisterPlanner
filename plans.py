@@ -50,7 +50,7 @@ def convertInputToDatetime(str):
 
 # Handles the submitted form data for creating a new plan.
 class CreatePlan(webapp2.RequestHandler):
-    def post(self):
+    def get(self):
         phone=self.request.get("phone")
         title = self.request.get("title")
         eventDate = convertInputToDatetime(self.request.get("eventtime"))

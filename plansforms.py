@@ -6,7 +6,7 @@ class CreatePlanForm(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
         self.response.write(
-            """<form method="post" action="/createplan">
+            """<form method="get" action="/createplan">
                 <div>Your phone number: <input type="text" name="phone"></div>
                 <div>Name of Event: <input type="text" name="title"></div>
                 <div>When is your event? <input type="datetime-local" name="eventtime">
