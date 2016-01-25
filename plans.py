@@ -6,6 +6,7 @@ import webapp2
 
 
 class Plan(db.Model):
+    planId = db.StringProperty()
     authorId = db.StringProperty(required=True)
     title = db.StringProperty(required=True)
     pointOfNoReturn = db.DateTimeProperty(required=True)
@@ -33,7 +34,12 @@ def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
     q.filter("authorId =", newAuthorId)
 
     if q.get() is None:
-        plan.put()
+        plan_key = plan.put()
+
+        temp_plan = db.get(plan_key)
+        temp_plan.planId = str(plan_key.id())
+        temp_plan.put()
+
         print "successfully wrote " + newTitle
         return True
     else:
@@ -75,17 +81,33 @@ class CreatePlan(webapp2.RequestHandler):
         else:
             self.response.write(title + " already exists")
 
-class ListPlans(webapp2.RequestHandler):
+# print a list of all the plans in the database
+class ListAllPlans(webapp2.RequestHandler):
     def get(self):
         # self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-
 
         f = "%m/%d/%Y %H:%M"
 
         #write all plans in system
         q = Plan.all()
         for p in q.run():
-            self.response.write("<li>userID: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
+            self.response.write("<li>planID: " + p.planId + "<br>hostID: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
 
 
-plansAPI = [('/listplans', ListPlans), ('/createplan', CreatePlan)]
+# get one specific plan, by planID
+class GetPlanByID(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
+        planid = self.request.get("planid")
+
+        q = Plan.all()
+        q.filter("planId =", planid)
+        plan = q.get()
+
+        if plan is None:
+            self.response.write(planid + " doesn't exist")
+        else:
+            self.response.write(plan.title)
+
+plansAPI = [('/listplans', ListAllPlans), ('/createplan', CreatePlan), ('/getplanbyid', GetPlanByID)]
