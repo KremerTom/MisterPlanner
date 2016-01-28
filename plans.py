@@ -3,6 +3,7 @@ from google.appengine.ext import db
 import users
 import datetime
 import webapp2
+import json
 
 
 class Plan(db.Model):
@@ -81,23 +82,37 @@ class CreatePlan(webapp2.RequestHandler):
         else:
             self.response.write(title + " already exists")
 
+def convertPlanToDictionary(plan):
+    f = "%m/%d/%Y %H:%M"
+
+    dict = {}
+    dict['Plan ID'] = str(plan.planId)
+    dict['Host ID'] = str(plan.authorId)
+    dict['Title'] = plan.title
+    dict['Respond By'] = plan.pointOfNoReturn.strftime(f)
+    dict['Event Date'] = plan.eventDate.strftime(f)
+
+    return dict
+
 # print a list of all the plans in the database
 class ListAllPlans(webapp2.RequestHandler):
     def get(self):
-        # self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-
-        f = "%m/%d/%Y %H:%M"
-
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         #write all plans in system
         q = Plan.all()
-        for p in q.run():
-            self.response.write("<li>planID: " + p.planId + "<br>hostID: " + p.authorId + "<br>Event Title: " + p.title + "<br>Event Start Time: " + p.eventDate.strftime(f) + "<br>Event Response Deadline: " + p.pointOfNoReturn.strftime(f) + "</li>\n")
 
+        temp = []
+
+        for p in q.run():
+            temp.append(convertPlanToDictionary(p))
+
+        plans = {"plans":temp}
+        self.response.write(json.dumps(plans))
 
 # get one specific plan, by planID
 class GetPlanByID(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
 
         planid = self.request.get("planid")
 
@@ -108,6 +123,6 @@ class GetPlanByID(webapp2.RequestHandler):
         if plan is None:
             self.response.write(planid + " doesn't exist")
         else:
-            self.response.write(plan.title)
+            self.response.write(json.dumps(convertPlanToDictionary(plan)))
 
 plansAPI = [('/listplans', ListAllPlans), ('/createplan', CreatePlan), ('/getplanbyid', GetPlanByID)]

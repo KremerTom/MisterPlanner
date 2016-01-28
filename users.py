@@ -40,18 +40,22 @@ class CreateUser(webapp2.RequestHandler):
 # list all users
 class ListUsers(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
 
         # write all users in system
         q = User.all()
-        for p in q.run():
-            self.response.write("<li>Phone: " + p.phoneNumber + ", ID: " + str(p.key().id()) + "</li>\n")
 
+        temp = []
+        for p in q.run():
+            temp.append(convertUserToDictionary(p))
+            # self.response.write("<li>Phone: " + p.phoneNumber + ", ID: " + str(p.key().id()) + "</li>\n")
+        users = {"users": temp}
+        self.response.write(json.dumps(users))
 
 # get one specific user, by ID
 class GetUserByID(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
 
         userid = self.request.get("userid")
 
@@ -63,15 +67,14 @@ class GetUserByID(webapp2.RequestHandler):
         if user is None:
             self.response.write(userid + " doesn't exist")
         else:
-            self.response.write(user.phoneNumber)
+            self.response.write(json.dumps(convertUserToDictionary(user)))
 
-        ### Still need to return the user!
 
 
 # Looks up a user account by phone number, and returns the userID of the user if it exists.
 class DoesAccountExist(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
 
         phone = self.request.get("phone")
 
@@ -81,26 +84,17 @@ class DoesAccountExist(webapp2.RequestHandler):
         user = q.get()
 
         if user is None:
-            self.response.write(phone + " doesn't exist")
+            # Could returning the JSON version of NULL
+            self.response.write(json.dumps(user))
             return None
         else:
-            self.response.write(user.phoneNumber + " exists.")
-            # SHOULD RETURN THE USER'S ID NUMBER HERE. IN JSON?
-            print user
-
-            # json_string = json.dumps(convertUserToDictionary(user))
-            # print json_string
-            # return json_string
-            # return json.dumps(user)
+            # Return JSON string
+            self.response.write(json.dumps(convertUserToDictionary(user)))
 
 
-# def convertUserToDictionary(user):
-#     conversion = {"userId": str(user.userId), "phoneNumber": str(user.phoneNumber)}
-#     print conversion
-#     return conversion
-
-
-        ### Still need to return the user!?
+def convertUserToDictionary(user):
+    conversion = {'User Id': str(user.userId), 'Phone Number': str(user.phoneNumber)}
+    return conversion
 
 
 
