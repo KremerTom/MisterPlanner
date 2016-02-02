@@ -14,6 +14,12 @@ class User(db.Model):
 # Change createuser to check if there is a shadow account first and, if there is, to convert it to a regular account
 # Add new API call for creating a shadow account
 
+# CREATE USER NOW AUTOMATICALLY ADDS A GOOGLE ID
+# there's both a function and an API endpoint to get a misterplanner user ID from the google user ID
+# every front-end call to an API that shows user specific data must include the user's ID, and the user's
+# ID can now easily be retrieved from the Google ID of the logged in user.
+#
+# Create user still requires a phone number.
 
 
 def createUser(phone):
