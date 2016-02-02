@@ -1,6 +1,7 @@
 from google.appengine.ext import db
 
 import users
+import invites
 import datetime
 import webapp2
 import json
@@ -13,10 +14,12 @@ class Plan(db.Model):
     pointOfNoReturn = db.DateTimeProperty(required=True)
     eventDate = db.DateTimeProperty(required=True)
 
-class UsersToPlans(db.Model):
-    userId = db.StringProperty(required=True)
-    planId = db.StringProperty(required=True)
-    attending = db.BooleanProperty(required=False)
+
+# TODO:
+# Go/No-go for an event (might need to add property to schema)
+# In createplan, require an array of phone numbers to invite, and call create invite for each
+# ^^^ IT IS UP TO THE FRONT END TO ADD THE LOGGED IN USER TO THE LIST OF INVITED NUMBERS
+
 
 def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
 
@@ -42,10 +45,10 @@ def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
         temp_plan.put()
 
         print "successfully wrote " + newTitle
-        return True
+        return temp_plan
     else:
         print newTitle + " already exists"
-        return False
+        return None
 
 
 
@@ -58,8 +61,10 @@ def convertInputToDatetime(str):
 # Handles the submitted form data for creating a new plan.
 class CreatePlan(webapp2.RequestHandler):
     def get(self):
-        phone=self.request.get("phone")
+        phone = self.request.get("phone")
         title = self.request.get("title")
+
+        # This won't work when we change our front-end, since it modifies the way that the html form submits dates/times
         eventDate = convertInputToDatetime(self.request.get("eventtime"))
         pointOfNoReturn = convertInputToDatetime(self.request.get("responsetime"))
 
@@ -77,8 +82,9 @@ class CreatePlan(webapp2.RequestHandler):
         userKey = str(p.key().id())
 
         # try to create the plan
-        if createPlan(userKey, title, pointOfNoReturn, eventDate):
-            self.response.write("success")
+        plan = createPlan(userKey, title, pointOfNoReturn, eventDate)
+        if plan is not None:
+            self.response.write(json.dumps(convertPlanToDictionary(plan)))
         else:
             self.response.write(title + " already exists")
 
@@ -94,17 +100,22 @@ def convertPlanToDictionary(plan):
 
     return dict
 
-# print a list of all the plans in the database
+# Respond with JSON object of all the plans that a specific user is invited to
+# Automatically includes plans that that user had created
 class ListAllPlans(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        #write all plans in system
-        q = Plan.all()
+        # write all plans in system
+        userId = self.request.get("userid")
+        q = invites.Invite.all()
+        q.filter("userId =", userId)
 
         temp = []
 
         for p in q.run():
-            temp.append(convertPlanToDictionary(p))
+            qq = Plan.all()
+            qq.filter("planId =", p.planId)
+            temp.append(convertPlanToDictionary(qq.get()))
 
         plans = {"plans":temp}
         self.response.write(json.dumps(plans))
