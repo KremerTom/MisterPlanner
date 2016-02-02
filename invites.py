@@ -43,7 +43,7 @@ class CreateInvite(webapp2.RequestHandler):
 def respondToInvite(userId, planId, response):
     now = datetime.datetime.now()
 
-    qq = Plan.all()
+    qq = plans.Plan.all()
     qq.filter("planId =", planId)
     thisPlan = qq.get()
     if thisPlan is not None and thisPlan.pointOfNoReturn < now:
@@ -77,11 +77,25 @@ class RespondToInvite(webapp2.RequestHandler):
             self.response.write("That invite does not exist")
 
 
+class ListInvites(webapp2.RequestHandler):
+    def get(self):
+        planid = self.request.get("planid")
 
-# TODO:
-# List all invitations to a certain event
-# Modify createinvite to discriminate between phone numbers that already have accounts and those who don't
+        temp = []
 
+        q = Invite.all()
+        q.filter("planId =", planid)
+
+        for i in q.run():
+            temp.append(convertInviteToDictionary(i))
+
+        if len(temp) == 0:
+            self.response.write("That event has no invites or does not exist!")
+            return
+
+        responses = {"responses": temp}
+
+        self.response.write(json.dumps(responses))
 
 
 def convertInviteToDictionary(invite):
@@ -99,4 +113,4 @@ def convertInviteToDictionary(invite):
 
 
 
-invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite)]
+invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite), ('/listinvites', ListInvites)]

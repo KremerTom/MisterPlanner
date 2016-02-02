@@ -85,6 +85,12 @@ class CreatePlan(webapp2.RequestHandler):
         plan = createPlan(userKey, title, pointOfNoReturn, eventDate)
         if plan is not None:
             self.response.write(json.dumps(convertPlanToDictionary(plan)))
+            invitedNums = self.request.get("invites").split()
+            for num in invitedNums:
+                userid = mpusers.getUserIdByNumber(num)
+                if userid is None:
+                    userid = mpusers.createShadowUser(num).userId
+                invites.createInvite(userid, plan.planId)
         else:
             self.response.write(title + " already exists")
 
