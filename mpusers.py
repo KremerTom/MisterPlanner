@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import users
 
 import webapp2
 import json
@@ -6,6 +7,7 @@ import json
 class User(db.Model):
     userId = db.StringProperty()
     phoneNumber = db.PhoneNumberProperty(required=True)
+    googleId = db.StringProperty()
 
 
 # TODO:
@@ -16,6 +18,7 @@ class User(db.Model):
 
 def createUser(phone):
     user = User(phoneNumber = phone)
+
     q = User.all()
     q.filter("phoneNumber =", phone)
 
@@ -24,6 +27,10 @@ def createUser(phone):
 
         temp_user = db.get(user_key)
         temp_user.userId = str(user_key.id())
+
+        # add current Google ID as the "googleId"
+        temp_user.googleId = users.get_current_user().user_id()
+
         temp_user.put()
 
         print "successfully wrote " + temp_user.phoneNumber
@@ -32,6 +39,29 @@ def createUser(phone):
         print phone + " already exists"
         return None
 
+
+# helper function to return a user's ID based on the Google ID
+def userIdFromGoogleId(googleId):
+    # get only one specific user
+    q = User.all()
+    q.filter("googleId =", googleId)
+    temp_user = q.get()
+
+    if temp_user is not None:
+        return temp_user.userId
+    else:
+        return None
+
+class UserIdFromGoogleId(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
+        userId = userIdFromGoogleId(self.request.get("googleid"))
+
+        if userId is not None:
+            self.response.write(userId)
+        else:
+            self.response.write("user doesn't exist")
 
 # create a new user with phone set to "phone" URL param
 class CreateUser(webapp2.RequestHandler):
@@ -43,6 +73,7 @@ class CreateUser(webapp2.RequestHandler):
             self.response.write(json.dumps(convertUserToDictionary(user)))
         else:
             self.response.write("user already exists")
+
 
 # list all users
 class ListUsers(webapp2.RequestHandler):
@@ -66,7 +97,7 @@ class GetUserByID(webapp2.RequestHandler):
 
         userid = self.request.get("userid")
 
-        # write only one specific user
+        # get only one specific user
         q = User.all()
         q.filter("userId =", userid)
         user = q.get()
@@ -98,11 +129,27 @@ class DoesAccountExist(webapp2.RequestHandler):
             # Return JSON string
             self.response.write(json.dumps(convertUserToDictionary(user)))
 
-
 def convertUserToDictionary(user):
     conversion = {'User Id': str(user.userId), 'Phone Number': str(user.phoneNumber)}
     return conversion
 
 
+# debug API endpoint to help with Google auth
+class GoogleUser(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
-usersAPI = [('/createuser', CreateUser), ('/listusers', ListUsers), ('/getuserbyid', GetUserByID), ('/doesaccountexist', DoesAccountExist)]
+        user = users.get_current_user()
+        if not user:
+            self.response.write("you're not signed in")
+        else:
+            self.response.write("<p>hello, %s!" % user.nickname() + "</p>")
+            self.response.write("<p>email is %s!" % user.email() + "</p>")
+            self.response.write("<p>google user id is %s!" % user.user_id() + "</p>")
+            self.response.write("<p>misterplanner user id is %s!" % userIdFromGoogleId(user.user_id()) + "</p>")
+
+            self.response.write("<a href=\"" + users.CreateLogoutURL("./googleuser") + "\">Logout</a>")
+
+
+
+usersAPI = [('/createuser', CreateUser), ('/listusers', ListUsers), ('/getuserbyid', GetUserByID), ('/doesaccountexist', DoesAccountExist), ('/useridfromgoogleid', UserIdFromGoogleId), ('/googleuser', GoogleUser)]

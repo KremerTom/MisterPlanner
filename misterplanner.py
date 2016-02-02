@@ -1,8 +1,8 @@
 import webapp2
 import plans
-import users
+import mpusers
 import invites
-import usersforms
+import mpusersforms
 import plansforms
 
 
@@ -15,6 +15,6 @@ class MainPage(webapp2.RequestHandler):
         # THANKS PENCILVESTER!
 
 mainPages = [('/', MainPage)]
-allPages = mainPages + users.usersAPI + usersforms.usersForms + plans.plansAPI + plansforms.plansForms + invites.invitesAPI
+allPages = mainPages + mpusers.usersAPI + mpusersforms.usersForms + plans.plansAPI + plansforms.plansForms + invites.invitesAPI
 
 app = webapp2.WSGIApplication(allPages, debug=True)

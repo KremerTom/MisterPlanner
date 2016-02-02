@@ -1,6 +1,6 @@
 from google.appengine.ext import db
 
-import users
+import mpusers
 import plans
 import datetime
 import webapp2

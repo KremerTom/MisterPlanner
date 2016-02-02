@@ -1,6 +1,6 @@
 from google.appengine.ext import db
 
-import users
+import mpusers
 import invites
 import datetime
 import webapp2
@@ -70,7 +70,7 @@ class CreatePlan(webapp2.RequestHandler):
 
         # Check if the entered phone number is actually a member
         # Necessary here to create the new plan with the owner's user key
-        q = users.User.all()
+        q = mpusers.User.all()
         q.filter("phoneNumber = ", phone)
         p = q.get()
         if p is None:

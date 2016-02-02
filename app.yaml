@@ -6,6 +6,7 @@ threadsafe: true
 handlers:
 - url: /.*
   script: misterplanner.app
+  login: required
 
 libraries:
 - name: webapp2
