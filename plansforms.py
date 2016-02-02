@@ -13,6 +13,7 @@ class CreatePlanForm(webapp2.RequestHandler):
                     </div>
                 <div>By when do you need your responses? <input type="datetime-local" name="responsetime">
                     </div>
+                <div>Phone numbers of those you want to invite? (space separated): <input type="text" name="invites"></div>
                 <div><input type="submit" value="Create Plan"></div>
               </form>""")
 

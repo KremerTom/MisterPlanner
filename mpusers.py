@@ -46,6 +46,29 @@ def createUser(phone):
         return None
 
 
+# The only difference between this and createUser is the lack of googleId
+def createShadowUser(phone):
+    user = User(phoneNumber = phone)
+
+    q = User.all()
+    q.filter("phoneNumber =", phone)
+
+    if q.get() is None:
+        user_key = user.put()
+
+        temp_user = db.get(user_key)
+        temp_user.userId = str(user_key.id())
+
+        temp_user.put()
+
+        print "successfully wrote " + temp_user.phoneNumber
+        return temp_user
+    else:
+        print phone + " already exists"
+        return None
+
+
+
 # helper function to return a user's ID based on the Google ID
 def userIdFromGoogleId(googleId):
     # get only one specific user
@@ -135,8 +158,19 @@ class DoesAccountExist(webapp2.RequestHandler):
             # Return JSON string
             self.response.write(json.dumps(convertUserToDictionary(user)))
 
+def getUserIdByNumber(phone):
+    q = User.all()
+    q.filter("phoneNumber =", phone)
+    user = q.get()
+
+    if user is None:
+        return None
+    else:
+        return user.userId
+
+
 def convertUserToDictionary(user):
-    conversion = {'User Id': str(user.userId), 'Phone Number': str(user.phoneNumber)}
+    conversion = {'User Id': str(user.userId), 'Phone Number': str(user.phoneNumber), 'Google Id': str(user.googleId)}
     return conversion
 
 
