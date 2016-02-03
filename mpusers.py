@@ -21,12 +21,19 @@ class User(db.Model):
 #
 # Create user still requires a phone number.
 
+# TODO: Consolidate the two create users!
 
 def createUser(phone):
+
+    # TODO:
+    # Check for googleID match, and if found, return None
+
     user = User(phoneNumber = phone)
 
     q = User.all()
-    q.filter("phoneNumber =", phone)
+    # q.filter("phoneNumber =", phone)
+    googleId = users.get_current_user().user_id()
+    q.filter("googleId =", googleId)
 
     if q.get() is None:
         user_key = user.put()
@@ -35,7 +42,7 @@ def createUser(phone):
         temp_user.userId = str(user_key.id())
 
         # add current Google ID as the "googleId"
-        temp_user.googleId = users.get_current_user().user_id()
+        temp_user.googleId = googleId
 
         temp_user.put()
 
