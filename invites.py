@@ -30,6 +30,8 @@ def createInvite(newUserId, newPlanId):
 
 class CreateInvite(webapp2.RequestHandler):
     def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
         userId = self.request.get("userid")
         planId = self.request.get("planid")
 
@@ -66,6 +68,8 @@ def respondToInvite(userId, planId, response):
 
 class RespondToInvite(webapp2.RequestHandler):
     def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
         userId = self.request.get("userid")
         planId = self.request.get("planid")
         response = (self.request.get("response") == 'True' or self.request.get("response") == 'true')
@@ -77,25 +81,31 @@ class RespondToInvite(webapp2.RequestHandler):
             self.response.write("That invite does not exist")
 
 
+def listInvites(planid):
+    temp = []
+
+    q = Invite.all()
+    q.filter("planId =", planid)
+
+    for i in q.run():
+        temp.append(convertInviteToDictionary(i))
+
+    if len(temp) == 0:
+        self.response.write("That event has no invites or does not exist!")
+        return
+
+    return temp
+
+
 class ListInvites(webapp2.RequestHandler):
     def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
         planid = self.request.get("planid")
 
-        temp = []
+        dict = {"responses": listInvites(planid)}
 
-        q = Invite.all()
-        q.filter("planId =", planid)
-
-        for i in q.run():
-            temp.append(convertInviteToDictionary(i))
-
-        if len(temp) == 0:
-            self.response.write("That event has no invites or does not exist!")
-            return
-
-        responses = {"responses": temp}
-
-        self.response.write(json.dumps(responses))
+        self.response.write(json.dumps(dict))
 
 
 def convertInviteToDictionary(invite):

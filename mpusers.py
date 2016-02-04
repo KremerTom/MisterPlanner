@@ -10,10 +10,6 @@ class User(db.Model):
     googleId = db.StringProperty()
 
 
-# TODO:
-# Change createuser to check if there is a shadow account first and, if there is, to convert it to a regular account
-# Add new API call for creating a shadow account
-
 # CREATE USER NOW AUTOMATICALLY ADDS A GOOGLE ID
 # there's both a function and an API endpoint to get a misterplanner user ID from the google user ID
 # every front-end call to an API that shows user specific data must include the user's ID, and the user's
@@ -21,13 +17,11 @@ class User(db.Model):
 #
 # Create user still requires a phone number.
 
-# TODO: Consolidate the two create users!
+
+# TODO:
+# Write API for converting a shadow account into a real account
 
 def createUser(phone):
-
-    # TODO:
-    # Check for googleID match, and if found, return None
-
     user = User(phoneNumber = phone)
 
     q = User.all()
@@ -75,6 +69,17 @@ def createShadowUser(phone):
         return None
 
 
+# create a new user with phone set to "phone" URL param
+class CreateUser(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
+        user = createUser(self.request.get("phone"))
+        if user is not None:
+            self.response.write(json.dumps(convertUserToDictionary(user)))
+        else:
+            self.response.write("user already exists")
+
 
 # helper function to return a user's ID based on the Google ID
 def userIdFromGoogleId(googleId):
@@ -88,6 +93,7 @@ def userIdFromGoogleId(googleId):
     else:
         return None
 
+
 class UserIdFromGoogleId(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -98,17 +104,6 @@ class UserIdFromGoogleId(webapp2.RequestHandler):
             self.response.write(userId)
         else:
             self.response.write("user doesn't exist")
-
-# create a new user with phone set to "phone" URL param
-class CreateUser(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-
-        user = createUser(self.request.get("phone"))
-        if user is not None:
-            self.response.write(json.dumps(convertUserToDictionary(user)))
-        else:
-            self.response.write("user already exists")
 
 
 # list all users
@@ -126,6 +121,7 @@ class ListUsers(webapp2.RequestHandler):
         users = {"users": temp}
         self.response.write(json.dumps(users))
 
+
 # get one specific user, by ID
 class GetUserByID(webapp2.RequestHandler):
     def get(self):
@@ -142,7 +138,6 @@ class GetUserByID(webapp2.RequestHandler):
             self.response.write(userid + " doesn't exist")
         else:
             self.response.write(json.dumps(convertUserToDictionary(user)))
-
 
 
 # Looks up a user account by phone number, and returns the userID of the user if it exists.
@@ -164,6 +159,7 @@ class DoesAccountExist(webapp2.RequestHandler):
         else:
             # Return JSON string
             self.response.write(json.dumps(convertUserToDictionary(user)))
+
 
 def getUserIdByNumber(phone):
     q = User.all()
