@@ -13,12 +13,7 @@ class Plan(db.Model):
     title = db.StringProperty(required=True)
     pointOfNoReturn = db.DateTimeProperty(required=True)
     eventDate = db.DateTimeProperty(required=True)
-
-
-# TODO:
-# Go/No-go for an event (might need to add property to schema)
-# In createplan, require an array of phone numbers to invite, and call create invite for each
-# ^^^ IT IS UP TO THE FRONT END TO ADD THE LOGGED IN USER TO THE LIST OF INVITED NUMBERS
+    status = db.BooleanProperty(required=False)
 
 
 def createPlan(newAuthorId, newTitle, newPointOfNoReturn, newEventDate):
@@ -61,6 +56,8 @@ def convertInputToDatetime(str):
 # Handles the submitted form data for creating a new plan.
 class CreatePlan(webapp2.RequestHandler):
     def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        
         phone = self.request.get("phone")
         title = self.request.get("title")
 
@@ -79,12 +76,20 @@ class CreatePlan(webapp2.RequestHandler):
 
         # CHANGED TO AUTHOR'S PHONE
         # Use that phone's key
-        userKey = str(p.key().id())
+        userKey = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
 
         # try to create the plan
         plan = createPlan(userKey, title, pointOfNoReturn, eventDate)
         if plan is not None:
             self.response.write(json.dumps(convertPlanToDictionary(plan)))
+            OGuserid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
+            invites.createInvite(OGuserid, plan.planId)
+            invitedNums = self.request.get("invites").split()
+            for num in invitedNums:
+                userid = mpusers.getUserIdByNumber(num)
+                if userid is None:
+                    userid = mpusers.createShadowUser(num).userId
+                invites.createInvite(userid, plan.planId)
         else:
             self.response.write(title + " already exists")
 
@@ -99,6 +104,31 @@ def convertPlanToDictionary(plan):
     dict['Event Date'] = plan.eventDate.strftime(f)
 
     return dict
+
+
+class ConfirmPlan(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
+        userId = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
+        planId = self.request.get("planid")
+        q = Plan.all()
+        q.filter("planId =", planId)
+        plan = q.get()
+
+        if plan.authorId != userId:
+            self.response.write("You are not the host of this event.")
+            return
+
+        toProceed = self.request.get("verdict")
+        proceed = (toProceed == 'True' or toProceed == 'true')
+
+        plan.status = proceed
+
+        plan.put()
+
+        self.response.write(json.dumps(convertPlanToDictionary(plan)))
+
 
 # Respond with JSON object of all the plans that a specific user is invited to
 # Automatically includes plans that that user had created
@@ -137,4 +167,4 @@ class GetPlanByID(webapp2.RequestHandler):
         else:
             self.response.write(json.dumps(convertPlanToDictionary(plan)))
 
-plansAPI = [('/plansbyuserid', PlansByUserId), ('/createplan', CreatePlan), ('/getplanbyid', GetPlanByID)]
+plansAPI = [('/plansbyuserid', PlansByUserId), ('/createplan', CreatePlan), ('/getplanbyid', GetPlanByID), ('/confirmplan', ConfirmPlan)]
