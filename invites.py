@@ -77,10 +77,33 @@ class RespondToInvite(webapp2.RequestHandler):
             self.response.write("That invite does not exist")
 
 
+def listInvites(planid):
+    temp = []
+
+    q = Invite.all()
+    q.filter("planId =", planid)
+
+    for i in q.run():
+        temp.append(convertInviteToDictionary(i))
+
+    if len(temp) == 0:
+        self.response.write("That event has no invites or does not exist!")
+        return
+
+    return temp
+
+
+class ListInvites(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
+        planid = self.request.get("planid")
+
+        dict = {"responses": listInvites(planid)}
+
+        self.response.write(json.dumps(dict))
 
 # TODO:
-# List all invitations to a certain event
-# Modify createinvite to discriminate between phone numbers that already have accounts and those who don't
 # Add some comments :)
 
 
@@ -100,4 +123,4 @@ def convertInviteToDictionary(invite):
 
 
 
-invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite)]
+invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite), ('/listinvites', ListInvites)]
