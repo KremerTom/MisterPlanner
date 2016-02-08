@@ -120,8 +120,7 @@ class ConfirmPlan(webapp2.RequestHandler):
             self.response.write("You are not the host of this event.")
             return
 
-        toProceed = self.request.get("verdict")
-        proceed = (toProceed == 'True' or toProceed == 'true')
+        proceed = self.request.get("verdict").lower() == 'yes'
 
         plan.status = proceed
 
