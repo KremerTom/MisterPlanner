@@ -30,8 +30,6 @@ def createInvite(newUserId, newPlanId):
 
 class CreateInvite(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-
         userId = self.request.get("userid")
         planId = self.request.get("planid")
 
@@ -68,11 +66,9 @@ def respondToInvite(userId, planId, response):
 
 class RespondToInvite(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-
         userId = self.request.get("userid")
         planId = self.request.get("planid")
-        response = (self.request.get("response") == 'True' or self.request.get("response") == 'true')
+        response = self.request.get("response").lower() == 'yes'
 
         updatedInvite = respondToInvite(userId, planId, response)
         if updatedInvite:
@@ -81,31 +77,12 @@ class RespondToInvite(webapp2.RequestHandler):
             self.response.write("That invite does not exist")
 
 
-def listInvites(planid):
-    temp = []
 
-    q = Invite.all()
-    q.filter("planId =", planid)
+# TODO:
+# List all invitations to a certain event
+# Modify createinvite to discriminate between phone numbers that already have accounts and those who don't
+# Add some comments :)
 
-    for i in q.run():
-        temp.append(convertInviteToDictionary(i))
-
-    if len(temp) == 0:
-        self.response.write("That event has no invites or does not exist!")
-        return
-
-    return temp
-
-
-class ListInvites(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-
-        planid = self.request.get("planid")
-
-        dict = {"responses": listInvites(planid)}
-
-        self.response.write(json.dumps(dict))
 
 
 def convertInviteToDictionary(invite):
@@ -123,4 +100,4 @@ def convertInviteToDictionary(invite):
 
 
 
-invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite), ('/listinvites', ListInvites)]
+invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite)]
