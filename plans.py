@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import users
 
 import mpusers
 import invites
@@ -58,7 +59,7 @@ class CreatePlan(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         
-        phone = self.request.get("phone")
+        # phone = self.request.get("phone")
         title = self.request.get("title")
 
         # This won't work when we change our front-end, since it modifies the way that the html form submits dates/times
@@ -67,12 +68,12 @@ class CreatePlan(webapp2.RequestHandler):
 
         # Check if the entered phone number is actually a member
         # Necessary here to create the new plan with the owner's user key
-        q = mpusers.User.all()
-        q.filter("phoneNumber = ", phone)
-        p = q.get()
-        if p is None:
-            self.response.write("<div>We don't have any user with that phone number</div>")
-            return
+        # q = mpusers.User.all()
+        # q.filter("phoneNumber = ", phone)
+        # p = q.get()
+        # if p is None:
+        #     self.response.write("<div>We don't have any user with that phone number</div>")
+        #     return
 
         # CHANGED TO AUTHOR'S PHONE
         # Use that phone's key
@@ -102,6 +103,7 @@ def convertPlanToDictionary(plan):
     dict['Title'] = plan.title
     dict['Respond By'] = plan.pointOfNoReturn.strftime(f)
     dict['Event Date'] = plan.eventDate.strftime(f)
+    dict['Status'] = plan.status
 
     return dict
 

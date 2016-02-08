@@ -6,12 +6,12 @@ class CreatePlanForm(webapp2.RequestHandler):
 
         self.response.write(
             """<form method="get" action="/createplan">
-                <div>Your phone number: <input type="text" name="phone"></div>
                 <div>Name of Event: <input type="text" name="title"></div>
                 <div>When is your event? <input type="datetime-local" name="eventtime">
                     </div>
                 <div>By when do you need your responses? <input type="datetime-local" name="responsetime">
                     </div>
+                <div>List the phone numbers of whomever you're inviting (space separated): <input type = "text" name = "invites"></div>
                 <div><input type="submit" value="Create Plan"></div>
               </form>""")
 
