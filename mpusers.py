@@ -4,6 +4,7 @@ from google.appengine.api import users
 import webapp2
 import json
 
+
 class User(db.Model):
     userId = db.StringProperty()
     phoneNumber = db.PhoneNumberProperty(required=True)
@@ -72,13 +73,15 @@ def createShadowUser(phone):
 # create a new user with phone set to "phone" URL param
 class CreateUser(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        self.response.headers.add_header('Access-Control-Allow-Origin', '*')
 
         user = createUser(self.request.get("phone"))
         if user is not None:
             self.response.write(json.dumps(convertUserToDictionary(user)))
         else:
             self.response.write("user already exists")
+
 
 
 # helper function to return a user's ID based on the Google ID

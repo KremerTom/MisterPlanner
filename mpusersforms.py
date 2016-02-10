@@ -7,7 +7,7 @@ class CreateUserForm(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
         self.response.write(
-            """<form method="get" action="/createuser">
+            """<form method="get" action="/userwascreated">
                 Enter phone number:<br>
                 <div><input type="text" name="phone"></div>
                 <div><input type="submit" value="Create Account"></div>
