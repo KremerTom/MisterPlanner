@@ -176,7 +176,7 @@ def getUserIdByNumber(phone):
 
 
 def convertUserToDictionary(user):
-    conversion = {'User Id': str(user.userId), 'Phone Number': str(user.phoneNumber), 'Google Id': str(user.googleId)}
+    conversion = {'UserId': str(user.userId), 'PhoneNumber': str(user.phoneNumber), 'GoogleId': str(user.googleId)}
     return conversion
 
 

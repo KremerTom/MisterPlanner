@@ -6,17 +6,20 @@
     <title>Title</title>
 </head>
 <body>
-    <script>
+    <script type="text/javascript">
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-                document.getElementById("demo").innerHTML = xhttp.responseText;
+                user = xhttp.responseText;
+                listplansurl = "/currentplans?userid=" + user.userId
+                window.location = listplansurl;
             }
         };
-        xhttp.open("GET", "{{url}}", true);
+        xhttp.open("GET", "{{createuser}}", true);
         xhttp.send();
     </script>
-    <div id="demo"></div>
+    <div id="plans"></div>
+
 </body>
 </html>
 {% endautoescape %}
