@@ -112,12 +112,12 @@ def convertInviteToDictionary(invite):
     f = "%m/%d/%Y %H:%M"
 
     dict = {}
-    dict['User ID'] = invite.userId
-    dict['Plan ID'] = invite.planId
+    dict['UserID'] = invite.userId
+    dict['PlanID'] = invite.planId
     dict['Response'] = invite.response
-    dict['Response Time'] = invite.responseTime
+    dict['ResponseTime'] = invite.responseTime
     if invite.responseTime is not None:
-        dict['Response Time'] = invite.responseTime.strftime(f)
+        dict['ResponseTime'] = invite.responseTime.strftime(f)
 
     return dict
 

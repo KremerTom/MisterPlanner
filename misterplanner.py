@@ -13,6 +13,8 @@ class MainPage(webapp2.RequestHandler):
         # Tom: Not 'RickyTickyTavvy'?
         # THANKS PENCILVESTER!
 
+        return self.redirect('/firstpage')
+
 mainPages = [('/', MainPage)]
 allPages = mainPages + mpusers.usersAPI + plans.plansAPI + invites.invitesAPI + dummyfrontend.pages
 

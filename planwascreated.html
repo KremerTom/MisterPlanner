@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script type="text/javascript">
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+                if (xhttp.responseText[0] != "{") {
+                    document.getElementById("error").innerHTML = xhttp.responseText;
+                    return;
+                }
+                plan = JSON.parse(xhttp.responseText);
+                console.log(plan);
+
+                listplansurl = "/currentplans?userid=" + plan.AuthorID;
+                console.log();
+                console.log(listplansurl);
+                window.location = listplansurl;
+            }
+        };
+        xhttp.open("GET", "{{createPlanURL}}", true);
+        xhttp.send();
+    </script>
+    <div id = "error"></div>
+</body>
+</html>
+{% endautoescape %}

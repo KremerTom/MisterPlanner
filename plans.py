@@ -59,24 +59,12 @@ class CreatePlan(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         
-        # phone = self.request.get("phone")
         title = self.request.get("title")
 
         # This won't work when we change our front-end, since it modifies the way that the html form submits dates/times
         eventDate = convertInputToDatetime(self.request.get("eventtime"))
         pointOfNoReturn = convertInputToDatetime(self.request.get("responsetime"))
 
-        # Check if the entered phone number is actually a member
-        # Necessary here to create the new plan with the owner's user key
-        # q = mpusers.User.all()
-        # q.filter("phoneNumber = ", phone)
-        # p = q.get()
-        # if p is None:
-        #     self.response.write("<div>We don't have any user with that phone number</div>")
-        #     return
-
-        # CHANGED TO AUTHOR'S PHONE
-        # Use that phone's key
         userKey = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
 
         # try to create the plan
@@ -98,12 +86,12 @@ def convertPlanToDictionary(plan):
     f = "%m/%d/%Y %H:%M"
 
     dict = {}
-    dict['Plan ID'] = str(plan.planId)
-    dict['Host ID'] = str(plan.authorId)
-    dict['Title'] = plan.title
-    dict['Respond By'] = plan.pointOfNoReturn.strftime(f)
-    dict['Event Date'] = plan.eventDate.strftime(f)
-    dict['Status'] = plan.status
+    dict["PlanID"] = str(plan.planId)
+    dict["AuthorID"] = str(plan.authorId)
+    dict["Title"] = plan.title
+    dict["RespondBy"] = plan.pointOfNoReturn.strftime(f)
+    dict["EventDate"] = plan.eventDate.strftime(f)
+    dict["Status"] = plan.status
 
     return dict
 
