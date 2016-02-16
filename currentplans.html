@@ -7,25 +7,48 @@
 </head>
 <body>
     <script type="text/javascript">
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (xhttp.readyState == 4 && xhttp.status == 200) {
-                plans = JSON.parse(xhttp.responseText).plans;
-                console.log(plans)
-                if (plans.length > 0) {
-                    var html = ""
-                    for (i = 0; i < plans.length; i++) {
-                        for (var x in plans[i]){
-                            html += x + ": " + plans[i][x] + " ";
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    plans = JSON.parse(xhttp.responseText).plans;
+                    if (plans.length > 0) {
+                        plans.sort(function(a,b) {
+                            var datea = new Date(a.EventDate);
+                            var dateb = new Date(b.EventDate);
+                            return datea-dateb;
+                        });
+                        var html = "";
+                        for (i = 0; i < plans.length; i++) {
+                            var planLink = "{{getOnePlanURL}}" + plans[i].PlanID
+                            html += "<a href= " + planLink + ">" + plans[i].Title + "</a><br>";
+                            html += "<div>When: " + plans[i].EventDate + "</div>";
+
+                            var response = plans[i].Response;
+                            var responseLink = "{{respondToInviteURL}}" + plans[i].PlanID + "{{respondToInviteURL2}}"
+                            var respondYes = responseLink + "yes"
+                            var respondNo = responseLink + "no"
+
+                            console.log(response);
+
+                            if (response == false) {
+                                html += "<div>You have already rejected this invitation. <a href = " + respondYes + ">Change your mind?</a></div>";
+                            } else if (response == true) {
+                                html += "<div>You have already RSVP'd. <a href = " + respondNo + ">Change your mind?</a></div>";
+                            } else {
+                                html += "<a href = " + respondYes + ">Accept</a> or <a href = " + respondNo + ">reject</a> the Invitation by: " + plans[i].RespondBy + "</a><br>";
+                            }
+
+
+                            html += "<br>";
                         }
-                        html += "<br>";
+                        document.getElementById("intro").innerHTML = html;
                     }
-                    document.getElementById("intro").innerHTML = html
                 }
-            }
-        };
-        xhttp.open("GET", "{{getPlansURL}}", true);
-        xhttp.send();
+            };
+            xhttp.open("GET", "{{getPlansURL}}", true);
+            xhttp.send();
+
+
     </script>
     <div id = "intro">Welcome to MisterPlanner! It looks like you aren't invited to any plans yet.</div>
     <div><a href={{newPlanURL}}>Click here to make a new plan.</a></div>

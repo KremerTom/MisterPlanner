@@ -119,6 +119,21 @@ class ConfirmPlan(webapp2.RequestHandler):
         self.response.write(json.dumps(convertPlanToDictionary(plan)))
 
 
+# Return an array of dictionaries, each representing a plan that the user is invited to.
+def plansByUserId(userId):
+    q = invites.Invite.all()
+    q.filter("userId =", userId)
+
+    temp = []
+
+    for p in q.run():
+        qq = Plan.all()
+        qq.filter("planId =", p.planId)
+        temp.append(convertPlanToDictionary(qq.get()))
+
+    return temp
+
+
 # Respond with JSON object of all the plans that a specific user is invited to
 # Automatically includes plans that that user had created
 class PlansByUserId(webapp2.RequestHandler):
@@ -127,18 +142,19 @@ class PlansByUserId(webapp2.RequestHandler):
 
         # write all plans that userid is invited to
         userId = self.request.get("userid")
-        q = invites.Invite.all()
-        q.filter("userId =", userId)
 
-        temp = []
+        temp = plansByUserId(userId)
 
-        for p in q.run():
-            qq = Plan.all()
-            qq.filter("planId =", p.planId)
-            temp.append(convertPlanToDictionary(qq.get()))
-
-        plans = {"plans":temp}
+        plans = {"plans": temp}
         self.response.write(json.dumps(plans))
+
+
+def getPlanById(planId):
+    q = Plan.all()
+    q.filter("planId =", planId)
+    plan = q.get()
+    return plan
+
 
 # get one specific plan, by planID
 class GetPlanByID(webapp2.RequestHandler):
@@ -147,9 +163,7 @@ class GetPlanByID(webapp2.RequestHandler):
 
         planid = self.request.get("planid")
 
-        q = Plan.all()
-        q.filter("planId =", planid)
-        plan = q.get()
+        plan = getPlanById(planid)
 
         if plan is None:
             self.response.write(planid + " doesn't exist")

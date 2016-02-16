@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import users
 
 import mpusers
 import plans
@@ -53,15 +54,15 @@ def respondToInvite(userId, planId, response):
     q = Invite.all()
     q.filter("userId =", userId)
     q.filter("planId =", planId)
+    thisInvite = q.get()
 
-    if q.get() is None:
+    if thisInvite is None:
         return None
     else:
-        invite = q.get()
-        invite.response = response
-        invite.responseTime = datetime.datetime.now()
-        invite.put()
-        return invite
+        thisInvite.response = response
+        thisInvite.responseTime = datetime.datetime.now()
+        thisInvite.put()
+        return thisInvite
 
 
 class RespondToInvite(webapp2.RequestHandler):
@@ -106,6 +107,45 @@ class ListInvites(webapp2.RequestHandler):
 # TODO:
 # Add some comments :)
 
+def getInvite(planid, userid):
+    q = Invite.all()
+    q.filter("planId =", planid)
+    q.filter("userId =", userid)
+
+    temp = q.get()
+    if temp:
+        dict = convertInviteToDictionary(temp)
+        return dict
+    else:
+        self.response.write("That invite does not exist!")
+        return None
+
+
+# Like PlansByUserID (in plans.py), but also returns user specific invitation information for each plan.
+# This is useful for having the information about both the plan and the invited user's status at the same time.
+class GetPlansAndInvites(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
+        userid = self.request.get("userid")
+        if userid is None:
+            userid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
+
+
+        plandicts = plans.plansByUserId(userid)
+        print plandicts
+        # planid = self.request.get("planid")
+
+        for plan in plandicts:
+            thisInvite = getInvite(plan['PlanID'], userid)
+            print thisInvite
+            plan['Response'] = thisInvite['Response']
+            plan['InvitedID'] = thisInvite['UserID']
+
+        dict = {"plans": plandicts}
+
+        self.response.write(json.dumps(dict))
+
 
 
 def convertInviteToDictionary(invite):
@@ -123,4 +163,4 @@ def convertInviteToDictionary(invite):
 
 
 
-invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite), ('/listinvites', ListInvites)]
+invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite), ('/listinvites', ListInvites), ('/getplansandinvites', GetPlansAndInvites)]
