@@ -98,15 +98,24 @@ class CurrentPlans(webapp2.RequestHandler):
         if userid is None or userid == "undefined":
             userid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
             # return self.redirect('/currentplans?userid=' + userid)
-        getPlansLink = '/plansbyuserid?userid=' + userid
+        getPlansLink = '/getplansandinvites?userid=' + userid
+        getPlanLink = '/getplanbyid?planid='
+        respondToInviteLink = '/respondtoinvite?userid=' + userid + '&planid='
+        respondToInviteLink2 = '&response='
 
         template_values = {
             'newPlanURL': newPlanLink,
-            'getPlansURL': getPlansLink
+            'getPlansURL': getPlansLink,
+            'userId': userid,
+            'getOnePlanURL': getPlanLink,
+            'respondToInviteURL': respondToInviteLink,
+            'respondToInviteURL2': respondToInviteLink2
         }
 
         template = JINJA_ENVIRONMENT.get_template('currentplans.html')
         self.response.write(template.render(template_values))
+
+        self.response.write("<a href=\"" + users.CreateLogoutURL("./googleuser") + "\">Logout</a>")
 
 
 # Converts the string representation that the form input accepts into an actual datetime
@@ -115,7 +124,7 @@ def convertInputToDatetime(str):
     return datetime.datetime.strptime(str, f)
 
 
-# NOT DONE YET
+# An "in between" page that calls the API to create the plan, then redirects to the front page
 class PlanWasCreated(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
