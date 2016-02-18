@@ -8,6 +8,7 @@ import webapp2
 import json
 
 
+
 class Invite(db.Model):
     userId = db.StringProperty(required=True)
     planId = db.StringProperty(required=True)

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Grass Tastes Bad</title>
 </head>
 <body>
     <script type="text/javascript">
@@ -15,11 +15,9 @@
                     return;
                 }
                 plan = JSON.parse(xhttp.responseText);
-                console.log(plan);
 
                 listplansurl = "/currentplans?userid=" + plan.AuthorID;
-                console.log();
-                console.log(listplansurl);
+
                 window.location = listplansurl;
             }
         };

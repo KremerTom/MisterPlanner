@@ -3,15 +3,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Abradolf Lincler</title>
 </head>
 <body>
     <script type="text/javascript">
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-                user = xhttp.responseText;
-                listplansurl = "/currentplans?userid=" + user.userId
+                user = JSON.parse(xhttp.responseText);
+                if (user.UserId == null) {
+                    document.getElementById("plans").innerHTML = "There is already an account with that phone number.";
+                    return;
+                }
+                listplansurl = "/currentplans?userid=" + user.UserId;
                 window.location = listplansurl;
             }
         };

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Account</title>
+</head>
+<body>
+    <div>It looks like you don't have an account with us yet!</div>
+    <div>Fill in the form below to get started.</div>
+    <br>
+
+    <form method="get" action="{{redirectURL}}">
+        Enter phone number:<br>
+        <div><input type="text" name="phone"></div>
+        <div><input type="submit" value="Create Account"></div>
+    </form>
+</body>
+</html>
+{% endautoescape %}

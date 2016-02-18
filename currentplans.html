@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>My Plans</title>
 </head>
 <body>
     <script type="text/javascript">
@@ -24,11 +24,9 @@
                             html += "<div>When: " + plans[i].EventDate + "</div>";
 
                             var response = plans[i].Response;
-                            var responseLink = "{{respondToInviteURL}}" + plans[i].PlanID + "{{respondToInviteURL2}}"
+                            var responseLink = "{{respondToInviteURL}}" + "{{userId}}" + "{{respondToInviteURL2}}" + plans[i].PlanID + "{{respondToInviteURL3}}"
                             var respondYes = responseLink + "yes"
                             var respondNo = responseLink + "no"
-
-                            console.log(response);
 
                             if (response == false) {
                                 html += "<div>You have already rejected this invitation. <a href = " + respondYes + ">Change your mind?</a></div>";
@@ -45,7 +43,8 @@
                     }
                 }
             };
-            xhttp.open("GET", "{{getPlansURL}}", true);
+            var getPlansLink = "{{getPlansURL}}" + "{{userId}}";
+            xhttp.open("GET", getPlansLink, true);
             xhttp.send();
 
 
