@@ -73,6 +73,10 @@ class CreatePlan(webapp2.RequestHandler):
             self.response.write(json.dumps(convertPlanToDictionary(plan)))
             OGuserid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
             invites.createInvite(OGuserid, plan.planId)
+
+            # The line directly below does not work and I can't figure out why
+            # invites.respondToInvite(OGuserid, plan.planId, 'yes')
+
             invitedNums = self.request.get("invites").split()
             for num in invitedNums:
                 userid = mpusers.getUserIdByNumber(num)

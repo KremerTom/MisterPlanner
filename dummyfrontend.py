@@ -35,9 +35,7 @@ class FirstPage(webapp2.RequestHandler):
             return self.redirect(path)
 
 
-# Not sure if this page is even necessary, this was more to practice how to use Jinja and javascript together
-# Change it, add links, whatever.
-# DO NOT DELETE IT! (or it's html page) It's a pretty good template
+# An in-between page that submits form data and parses the response json for the main front page.
 class UserWasCreated(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
@@ -52,31 +50,21 @@ class UserWasCreated(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 
-# Copy-pasted from mpusersforms.py
 class CreateUserForm(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
-        # No Jinja because this was directly copy-pasted
-        self.response.write(
-            """
-              <div>It looks like you don't have an account with us yet!</div>
-              <div>Fill in the form below to get started.</div>
-              <br>
+        template_values = {
+            'redirectURL': '/userwascreated'
+        }
 
-              <form method="get" action="/userwascreated">
-                Enter phone number:<br>
-                <div><input type="text" name="phone"></div>
-                <div><input type="submit" value="Create Account"></div>
-              </form>
-            """)
+        template = JINJA_ENVIRONMENT.get_template('createuserform.html')
+        self.response.write(template.render(template_values))
 
 
-# Copy-pasted from plansforms.py
 class CreatePlanForm(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-
 
         template_values = {
             'redirectURL': '/planwascreated'
@@ -98,10 +86,15 @@ class CurrentPlans(webapp2.RequestHandler):
         if userid is None or userid == "undefined":
             userid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
             # return self.redirect('/currentplans?userid=' + userid)
-        getPlansLink = '/getplansandinvites?userid=' + userid
+
+        # Weird bug where after creating account (including one that was a shadow account),
+        # the userid is undefined. The next line of code is a TEMPORARY FIX.
+        userid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
+        getPlansLink = '/getplansandinvites?userid=' # + userid
         getPlanLink = '/getplanbyid?planid='
-        respondToInviteLink = '/respondtoinvite?userid=' + userid + '&planid='
-        respondToInviteLink2 = '&response='
+        respondToInviteLink = '/respondtoinvite?userid='
+        respondToInviteLink2 = '&planid='
+        respondToInviteLink3 = '&response='
 
         template_values = {
             'newPlanURL': newPlanLink,
@@ -109,7 +102,8 @@ class CurrentPlans(webapp2.RequestHandler):
             'userId': userid,
             'getOnePlanURL': getPlanLink,
             'respondToInviteURL': respondToInviteLink,
-            'respondToInviteURL2': respondToInviteLink2
+            'respondToInviteURL2': respondToInviteLink2,
+            'respondToInviteURL3': respondToInviteLink3
         }
 
         template = JINJA_ENVIRONMENT.get_template('currentplans.html')

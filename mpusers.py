@@ -26,23 +26,41 @@ def createUser(phone):
     user = User(phoneNumber = phone)
 
     q = User.all()
-    # q.filter("phoneNumber =", phone)
     googleId = users.get_current_user().user_id()
     q.filter("googleId =", googleId)
+    googleMatch = q.get()
 
-    if q.get() is None:
-        user_key = user.put()
+    qq = User.all()
+    qq.filter("phoneNumber =", phone)
+    phoneMatch = qq.get()
 
-        temp_user = db.get(user_key)
-        temp_user.userId = str(user_key.id())
+    # Check if another full account already has that phone number
+    if phoneMatch is not None and phoneMatch.googleId is not None:
+        print phone + " already exists"
+        return None
 
-        # add current Google ID as the "googleId"
-        temp_user.googleId = googleId
+    if googleMatch is None:
+        if phoneMatch is None:
+            # Completely new account
+            user_key = user.put()
 
-        temp_user.put()
+            temp_user = db.get(user_key)
+            temp_user.userId = str(user_key.id())
 
-        print "successfully wrote " + temp_user.phoneNumber
-        return temp_user
+            # add current Google ID as the "googleId"
+            temp_user.googleId = googleId
+
+            temp_user.put()
+
+            print "successfully created new account for " + temp_user.phoneNumber
+            return temp_user
+        else:
+            # Convert a shadow account to a full acount
+            phoneMatch.googleId = googleId
+            phoneMatch.put()
+
+            print "successfully converted " + phoneMatch.phoneNumber + " to a full account."
+            return phoneMatch
     else:
         print phone + " already exists"
         return None
@@ -63,7 +81,7 @@ def createShadowUser(phone):
 
         temp_user.put()
 
-        print "successfully wrote " + temp_user.phoneNumber
+        print "successfully wrote " + temp_user.phoneNumber + " as a shadow account."
         return temp_user
     else:
         print phone + " already exists"
@@ -80,7 +98,7 @@ class CreateUser(webapp2.RequestHandler):
         if user is not None:
             self.response.write(json.dumps(convertUserToDictionary(user)))
         else:
-            self.response.write("user already exists")
+            self.response.write(json.dumps(convertUserToDictionary(user)))
 
 
 
@@ -176,7 +194,10 @@ def getUserIdByNumber(phone):
 
 
 def convertUserToDictionary(user):
-    conversion = {'UserId': str(user.userId), 'PhoneNumber': str(user.phoneNumber), 'GoogleId': str(user.googleId)}
+    if user is None:
+        conversion = {}
+    else:
+        conversion = {'UserId': str(user.userId), 'PhoneNumber': str(user.phoneNumber), 'GoogleId': str(user.googleId)}
     return conversion
 
 
