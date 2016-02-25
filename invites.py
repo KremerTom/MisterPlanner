@@ -95,6 +95,7 @@ def listInvites(planid):
     return temp
 
 
+# Prints out JSON of all invites of one specific plan (by its planid)
 class ListInvites(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -105,8 +106,6 @@ class ListInvites(webapp2.RequestHandler):
 
         self.response.write(json.dumps(dict))
 
-# TODO:
-# Add some comments :)
 
 def getInvite(planid, userid):
     q = Invite.all()
@@ -124,7 +123,7 @@ def getInvite(planid, userid):
 
 # Like PlansByUserID (in plans.py), but also returns user specific invitation information for each plan.
 # This is useful for having the information about both the plan and the invited user's status at the same time.
-class GetPlansAndInvites(webapp2.RequestHandler):
+class GetPlansAndUserResponses(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
 
@@ -164,4 +163,4 @@ def convertInviteToDictionary(invite):
 
 
 
-invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite), ('/listinvites', ListInvites), ('/getplansandinvites', GetPlansAndInvites)]
+invitesAPI = [('/createinvite', CreateInvite), ('/respondtoinvite', RespondToInvite), ('/listinvites', ListInvites), ('/getplansanduserresponses', GetPlansAndUserResponses)]

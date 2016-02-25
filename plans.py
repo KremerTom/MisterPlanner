@@ -174,4 +174,22 @@ class GetPlanByID(webapp2.RequestHandler):
         else:
             self.response.write(json.dumps(convertPlanToDictionary(plan)))
 
-plansAPI = [('/plansbyuserid', PlansByUserId), ('/createplan', CreatePlan), ('/getplanbyid', GetPlanByID), ('/confirmplan', ConfirmPlan)]
+
+class GetPlanAndInvitesByID(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
+        planid = self.request.get("planid")
+        plan = getPlanById(planid)
+        planDict = convertPlanToDictionary(plan)
+        invitesDict = invites.listInvites(planid)
+        dict = {"Plan": planDict, "Invites": invitesDict}
+
+        if plan is None:
+            self.response.write(planid + " doesn't exist")
+        else:
+            self.response.write(json.dumps(dict))
+
+
+plansAPI = [('/plansbyuserid', PlansByUserId), ('/createplan', CreatePlan), ('/getplanbyid', GetPlanByID), ('/confirmplan', ConfirmPlan),
+            ('/getplanandinvitesbyid', GetPlanAndInvitesByID)]

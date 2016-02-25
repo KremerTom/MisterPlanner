@@ -27,19 +27,24 @@ def createUser(phone):
 
     q = User.all()
     googleId = users.get_current_user().user_id()
-    q.filter("googleId =", googleId)
-    googleMatch = q.get()
+    userId = userIdFromGoogleId(googleId)
+    q.filter("userId =", userId)
+    userMatch = q.get()
+
+    # googleId = users.get_current_user().user_id()
+    # q.filter("googleId =", googleId)
+    # googleMatch = q.get()
 
     qq = User.all()
     qq.filter("phoneNumber =", phone)
     phoneMatch = qq.get()
 
     # Check if another full account already has that phone number
-    if phoneMatch is not None and phoneMatch.googleId is not None:
+    if phoneMatch is not None and phoneMatch.userId is not None:
         print phone + " already exists"
         return None
 
-    if googleMatch is None:
+    if userMatch is None:
         if phoneMatch is None:
             # Completely new account
             user_key = user.put()

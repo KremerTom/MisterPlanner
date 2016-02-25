@@ -19,7 +19,12 @@
                         });
                         var html = "";
                         for (i = 0; i < plans.length; i++) {
-                            var planLink = "{{getOnePlanURL}}" + plans[i].PlanID
+                            var planDate = new Date(plans[i].EventDate);
+                            var current = new Date();
+
+                            if ((planDate - current) < -10800000) { continue; }
+
+                            var planLink = "{{getOnePlanURL}}" + "{{userId}}" + "{{getOnePlanURL2}}" + plans[i].PlanID
                             html += "<a href= " + planLink + ">" + plans[i].Title + "</a><br>";
                             html += "<div>When: " + plans[i].EventDate + "</div>";
 
