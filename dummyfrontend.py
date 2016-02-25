@@ -9,6 +9,7 @@ import datetime
 from google.appengine.api import users
 
 import mpusers
+import plans
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -90,8 +91,10 @@ class CurrentPlans(webapp2.RequestHandler):
         # Weird bug where after creating account (including one that was a shadow account),
         # the userid is undefined. The next line of code is a TEMPORARY FIX.
         userid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
-        getPlansLink = '/getplansandinvites?userid=' # + userid
-        getPlanLink = '/getplanbyid?planid='
+
+        getPlansLink = '/getplansanduserresponses?userid=' # + userid
+        getPlanLink = '/viewoneplan?userid='
+        getPlanLink2 = '&planid='
         respondToInviteLink = '/respondtoinvite?userid='
         respondToInviteLink2 = '&planid='
         respondToInviteLink3 = '&response='
@@ -101,6 +104,7 @@ class CurrentPlans(webapp2.RequestHandler):
             'getPlansURL': getPlansLink,
             'userId': userid,
             'getOnePlanURL': getPlanLink,
+            'getOnePlanURL2': getPlanLink2,
             'respondToInviteURL': respondToInviteLink,
             'respondToInviteURL2': respondToInviteLink2,
             'respondToInviteURL3': respondToInviteLink3
@@ -110,6 +114,35 @@ class CurrentPlans(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
         self.response.write("<a href=\"" + users.CreateLogoutURL("./googleuser") + "\">Logout</a>")
+
+class ViewOnePlan(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
+        planid = self.request.get("planid")
+        userid = self.request.get("userid")
+
+        getPlanLink = '/getplanandinvitesbyid?planid=' + planid
+        respondToInviteLink = '/respondtoinvite?userid='
+        respondToInviteLink2 = '&planid='
+        respondToInviteLink3 = '&response='
+
+        currentPlansLink = '/currentplans?userid=' + userid
+
+        # plan = plans.getPlanById(planid)
+
+
+        template_values = {
+            'getPlanAPI': getPlanLink,
+            'currentPlansURL': currentPlansLink,
+            'userId': userid,
+            'respondToInviteURL': respondToInviteLink,
+            'respondToInviteURL2': respondToInviteLink2,
+            'respondToInviteURL3': respondToInviteLink3
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('viewoneplan.html')
+        self.response.write(template.render(template_values))
 
 
 # Converts the string representation that the form input accepts into an actual datetime
@@ -138,4 +171,4 @@ class PlanWasCreated(webapp2.RequestHandler):
 
 
 pages = [('/currentplans', CurrentPlans), ('/createplanform', CreatePlanForm), ('/createuserform', CreateUserForm), ('/userwascreated', UserWasCreated),
-         ('/firstpage', FirstPage), ('/planwascreated', PlanWasCreated)]
+         ('/firstpage', FirstPage), ('/planwascreated', PlanWasCreated), ('/viewoneplan', ViewOnePlan)]
