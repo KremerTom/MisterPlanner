@@ -3,10 +3,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title id= "title"></title>
+    <title id="title"></title>
 </head>
 <body>
-    <script type="text/javascript">
+<script type="text/javascript">
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -16,36 +16,58 @@
                 invites = response.Invites;
                 document.getElementById("title").innerHTML = plan.Title;
 
-                var html = "";
-                html += "Title: " + plan.Title + "<br>";
-                html += "Host: " + plan.AuthorID + "<br>";
-                html += "When: " + plan.EventDate + "<br>";
-                html += "Respond By: " + plan.RespondBy + "<br>";
-                html += "<br>" + "Status: ";
-                if (plan.Status == null) {
-                    html += "Still in limbo"
-                } else if (plan.Status == true) {
-                    html += "Confirmed";
-                } else {
-                    html += "Cancelled";
-                }
-                html += "<br>";
+                buildPage(plan, invites);
 
-                html += "<br>People who are invited: <br>"
-                var invite;
-                for (i = 0; i < invites.length; i++) {
-                    html += "UserID: " + invites[i].UserID + "<br>" + "Response: " + invites[i].Response; + "<br>";
-                }
-
-                document.getElementById("plan").innerHTML = html;
             }
         };
         xhttp.open("GET", "{{getPlanAPI}}", true);
         xhttp.send();
-    </script>
-    <div id = "plan"></div>
-    <br>
-    <div><a href="{{currentPlansURL}}">Go back to all current plans</a></div>
+
+        function buildPage(plan, invites) {
+            var html = "";
+            html += "Title: " + plan.Title + "<br>";
+            html += "Host: " + plan.AuthorID + "<br>";
+            html += "When: " + plan.EventDate + "<br>";
+            html += "Respond By: " + plan.RespondBy + "<br>";
+            html += "<br>" + "Status: ";
+            if (plan.Status == null) {
+                html += "Still in limbo"
+            } else if (plan.Status == true) {
+                html += "Confirmed";
+            } else {
+                html += "Cancelled";
+            }
+            html += "<br><br>";
+
+            var going = [];
+            var notgoing = [];
+            var noresponse = [];
+            for (var i = 0; i < invites.length; i++) {
+                if (invites[i].Response == true) { going.push(invites[i]); }
+                else if (invites[i].Response == false) {notgoing.push(invites[i]); }
+                else { noresponse.push(invites[i]); }
+            }
+            html += "<div>People attending: ";
+            for (var i = 0; i < going.length; i++) {
+                html += going[i].UserID + " ";
+            }
+            html += "</div><div>People who can't make it: ";
+            for (var i = 0; i < notgoing.length; i++) {
+                html += notgoing[i].UserID + " ";
+            }
+            html += "</div><div>People who haven't responded: ";
+            for (var i = 0; i < noresponse.length; i++) {
+                html += noresponse[i].UserID + " ";
+            }
+            html += "</div>";
+            document.getElementById("plan").innerHTML = html;
+
+        }
+
+</script>
+<div id="plan"></div>
+<br>
+<div><a href="{{currentPlansURL}}">Go back to all current plans</a></div>
 </body>
 </html>
 {% endautoescape %}

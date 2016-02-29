@@ -10,7 +10,7 @@
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (xhttp.readyState == 4 && xhttp.status == 200) {
-                    plans = JSON.parse(xhttp.responseText).plans;
+                    var plans = JSON.parse(xhttp.responseText).plans;
                     if (plans.length > 0) {
                         plans.sort(function(a,b) {
                             var datea = new Date(a.EventDate);
@@ -44,13 +44,27 @@
 
                             html += "<br>";
                         }
-                        document.getElementById("intro").innerHTML = html;
+                        if (html != "") {
+                            document.getElementById("intro").innerHTML = html;
+                        }
+
                     }
                 }
             };
             var getPlansLink = "{{getPlansURL}}" + "{{userId}}";
             xhttp.open("GET", getPlansLink, true);
             xhttp.send();
+
+            function respondToInvite(link) {
+                var xhttp2 = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (xhttp2.readyState == 4 && xhttp2.status == 200) {
+                        location.reload();
+                    }
+                };
+                xhttp2.open("GET", link, true);
+                xhttp2.send();
+            }
 
 
     </script>

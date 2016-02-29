@@ -50,7 +50,7 @@ def respondToInvite(userId, planId, response):
     thisPlan = qq.get()
     if thisPlan is not None and thisPlan.pointOfNoReturn < now:
         print("It's too late to respond to that event.")
-        return None
+        # return None
 
     q = Invite.all()
     q.filter("userId =", userId)
