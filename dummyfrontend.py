@@ -90,12 +90,12 @@ class CurrentPlans(webapp2.RequestHandler):
 
         # Weird bug where after creating account (including one that was a shadow account),
         # the userid is undefined. The next line of code is a TEMPORARY FIX.
-        userid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
+        # userid = mpusers.userIdFromGoogleId(users.get_current_user().user_id())
 
         getPlansLink = '/getplansanduserresponses?userid=' # + userid
         getPlanLink = '/viewoneplan?userid='
         getPlanLink2 = '&planid='
-        respondToInviteLink = '/respondtoinvite?userid='
+        respondToInviteLink = '/invitewasupdated?userid='
         respondToInviteLink2 = '&planid='
         respondToInviteLink3 = '&response='
 
@@ -123,7 +123,7 @@ class ViewOnePlan(webapp2.RequestHandler):
         userid = self.request.get("userid")
 
         getPlanLink = '/getplanandinvitesbyid?planid=' + planid
-        respondToInviteLink = '/respondtoinvite?userid='
+        respondToInviteLink = '/invitewasupdated?userid='
         respondToInviteLink2 = '&planid='
         respondToInviteLink3 = '&response='
 
@@ -170,5 +170,24 @@ class PlanWasCreated(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 
+# An "in between" page that calls the API to update an invite, then redirects to the front page
+class InviteWasUpdated(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
+        url = self.request.url
+        index = url.index("?")
+        path = url[index:]
+
+        url = '/respondtoinvite' + path
+
+        template_values = {
+            'respondToInviteURL': url
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('invitewasupdated.html')
+        self.response.write(template.render(template_values))
+
+
 pages = [('/currentplans', CurrentPlans), ('/createplanform', CreatePlanForm), ('/createuserform', CreateUserForm), ('/userwascreated', UserWasCreated),
-         ('/firstpage', FirstPage), ('/planwascreated', PlanWasCreated), ('/viewoneplan', ViewOnePlan)]
+         ('/firstpage', FirstPage), ('/planwascreated', PlanWasCreated), ('/viewoneplan', ViewOnePlan), ('/invitewasupdated', InviteWasUpdated)]
