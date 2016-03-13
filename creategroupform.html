@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a Group</title>
+</head>
+<body>
+    <form method="get" action={{redirectURL}}>
+        <div>Name of Group: <input type ="text" name ="name"></div>
+        <div>List the phone numbers of group members (space separated): <input type="text" name="numbers"></div>
+        <div><input type="submit" value="Create Group"></div>
+    </form>
+
+</body>
+</html>
+{% endautoescape %}

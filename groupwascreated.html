@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>I am Bird Person</title>
+</head>
+<body>
+     <script type="text/javascript">
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+                if (xhttp.responseText[0] != "{") {
+                    document.getElementById("error").innerHTML = xhttp.responseText;
+                    return;
+                }
+                group = JSON.parse(xhttp.responseText);
+
+
+                listplansurl = "/currentplans?userid=" + group.HostID;
+
+                window.location = listplansurl;
+            }
+        };
+        xhttp.open("GET", "{{createGroupURL}}", true);
+        xhttp.send();
+    </script>
+    <div id = "error"></div>
+</body>
+</html>
+{% endautoescape %}

@@ -63,6 +63,36 @@ class CreateUserForm(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 
+class CreateGroupForm(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
+        template_values = {
+            'redirectURL': '/groupwascreated'
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('creategroupform.html')
+        self.response.write(template.render(template_values))
+
+# An in-between page that submits form data and parses the response json for the main front page.
+class GroupWasCreated(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
+        url = self.request.url
+        index = url.index("?")
+        path = url[index:]
+
+        url = '/creategroup' + path
+
+        template_values = {
+            'createGroupURL': url
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('groupwascreated.html')
+        self.response.write(template.render(template_values))
+
+
 class CreatePlanForm(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
@@ -113,6 +143,7 @@ class CurrentPlans(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('currentplans.html')
         self.response.write(template.render(template_values))
 
+        self.response.write('<a href="/creategroupform">Create A Friend Group</a><br>')
         self.response.write("<a href=\"" + users.CreateLogoutURL("./googleuser") + "\">Logout</a>")
 
 class ViewOnePlan(webapp2.RequestHandler):
@@ -190,4 +221,5 @@ class InviteWasUpdated(webapp2.RequestHandler):
 
 
 pages = [('/currentplans', CurrentPlans), ('/createplanform', CreatePlanForm), ('/createuserform', CreateUserForm), ('/userwascreated', UserWasCreated),
-         ('/firstpage', FirstPage), ('/planwascreated', PlanWasCreated), ('/viewoneplan', ViewOnePlan), ('/invitewasupdated', InviteWasUpdated)]
+         ('/firstpage', FirstPage), ('/planwascreated', PlanWasCreated), ('/viewoneplan', ViewOnePlan), ('/invitewasupdated', InviteWasUpdated),
+         ('/creategroupform', CreateGroupForm), ('/groupwascreated', GroupWasCreated)]
