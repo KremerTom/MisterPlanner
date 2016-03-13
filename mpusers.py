@@ -148,6 +148,13 @@ class ListUsers(webapp2.RequestHandler):
         self.response.write(json.dumps(users))
 
 
+def getUserByID(userid):
+    # get only one specific user
+    q = User.all()
+    q.filter("userId =", userid)
+    user = q.get()
+    return user
+
 # get one specific user, by ID
 class GetUserByID(webapp2.RequestHandler):
     def get(self):
@@ -155,10 +162,7 @@ class GetUserByID(webapp2.RequestHandler):
 
         userid = self.request.get("userid")
 
-        # get only one specific user
-        q = User.all()
-        q.filter("userId =", userid)
-        user = q.get()
+        user = getUserByID(userid)
 
         if user is None:
             self.response.write(userid + " doesn't exist")

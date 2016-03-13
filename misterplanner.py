@@ -2,6 +2,7 @@ import webapp2
 import plans
 import mpusers
 import invites
+import groups
 import dummyfrontend
 
 
@@ -16,6 +17,6 @@ class MainPage(webapp2.RequestHandler):
         return self.redirect('/firstpage')
 
 mainPages = [('/', MainPage)]
-allPages = mainPages + mpusers.usersAPI + plans.plansAPI + invites.invitesAPI + dummyfrontend.pages
+allPages = mainPages + mpusers.usersAPI + plans.plansAPI + invites.invitesAPI + groups.groupsAPI + dummyfrontend.pages
 
 app = webapp2.WSGIApplication(allPages, debug=True)
