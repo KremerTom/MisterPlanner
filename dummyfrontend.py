@@ -10,6 +10,7 @@ from google.appengine.api import users
 
 import mpusers
 import plans
+import groups
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -96,6 +97,8 @@ class GroupWasCreated(webapp2.RequestHandler):
 class CreatePlanForm(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
+        groups = groups.getGroupsByHost
 
         template_values = {
             'redirectURL': '/planwascreated'
