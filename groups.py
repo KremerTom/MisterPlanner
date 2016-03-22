@@ -54,6 +54,69 @@ class AddToGroup(webapp2.RequestHandler):
         self.response.write(json.dumps(dict))
 
 
+def removeFromGroup(groupid, phoneNums):
+    qq = GroupMember.all()
+    qq.filter("groupId =", groupid)
+    member = qq.get()
+
+    while member is not None:
+        phone = mpusers.getNumberByUserId(member.userId)
+        if phone in phoneNums:
+            member.delete()
+
+        member = qq.get()
+
+    return
+
+
+# API for removing users from a group, given the phone numbers and the groupid
+class RemoveFromGroup(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
+        nums = self.request.get("numbers").split()
+        groupid = self.request.get("groupid")
+
+        removeFromGroup(groupid, nums)
+
+
+
+def deleteGroup(groupid):
+    noProblems = True
+
+    q = GroupMember.all()
+    db.delete(q.filter("groupId =", groupid))
+
+    qq = GroupInfo.all()
+    db.delete(qq.filter("groupId =", groupid))
+
+
+class DeleteGroup(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+
+        groupid = self.request.get("groupid")
+
+        deleteGroup(groupid)
+
+
+
+# API to change groupName of that GroupInfo entry
+class RenameGroup(webapp2.RequestHandler):
+    def get(self):
+        name = self.request.get("name")
+        groupid = self.request.get("groupid")
+
+        q = GroupInfo.all()
+        q.filter("groupId =", groupid)
+        thisGroup = q.get()
+        if thisGroup is None:
+            print "That group does not exist"
+            return
+        thisGroup.groupName = name
+        thisGroup.put()
+
+
 
 def createGroup(name, hostId, phoneNums):
     # Check if host id actually exists
@@ -131,28 +194,6 @@ def getGroupsByHost(userid):
         temp.append(dict)
     return temp
 
-    # EXTREMELY SLOW
-    # CHANGE YOUR APPROACH
-    #
-    # while thisGroup is not None:
-    #     gId = thisGroup.groupId
-    #     print gId
-    #     qq = GroupMember.all()
-    #     qq.filter("groupId =", gId)
-    #     member = qq.get()
-    #     dict = convertGroupInfoToDict(thisGroup)
-    #     dict["Users"] = []
-    #
-    #     while member is not None:
-    #         print member.userId
-    #         dict["Users"].append(member.userId)
-    #         member = qq.get()
-    #
-    #
-    #     temp.append(dict)
-    #     thisGroup = q.get()
-    #
-    # return temp
 
 
 # API for getting all the Groups (by combining GroupInfo with array of userIDs from GroupMember)
@@ -186,4 +227,5 @@ def convertGroupInfoToDict(group):
     return dict
 
 
-groupsAPI = [('/creategroup', CreateGroup), ('/addtogroup', AddToGroup), ('/getgroupsbyhost', GetGroupsByHost)]
+groupsAPI = [('/creategroup', CreateGroup), ('/addtogroup', AddToGroup), ('/getgroupsbyhost', GetGroupsByHost),
+             ('/renamegroup', RenameGroup), ('/removefromgroup', RemoveFromGroup), ('/deletegroup', DeleteGroup)]
