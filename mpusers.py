@@ -203,6 +203,15 @@ def getUserIdByNumber(phone):
     else:
         return user.userId
 
+def getNumberByUserId(userid):
+    q = User.all()
+    q.filter("userId =", userid)
+    user = q.get()
+    if user is None:
+        return None
+    else:
+        return user.phoneNumber
+
 
 def convertUserToDictionary(user):
     if user is None:
